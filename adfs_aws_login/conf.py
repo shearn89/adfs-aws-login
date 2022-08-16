@@ -24,7 +24,7 @@ def init():
         my_conf = Config(_parse_args(), aws_config)
     except ConfigExeption as ex:
         print(ex)
-        sys.exit(1)
+        sys.exit(10)
 
     return my_conf
 
