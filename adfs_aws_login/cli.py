@@ -16,6 +16,7 @@ def adfs_aws_login():
     try:
         conf = init()
     except:
+        print("failed to load config")
         sys.exit(9)
     username = None
     # Get the federated credentials from the user
@@ -38,6 +39,7 @@ def adfs_aws_login():
     try:
         assertion, awsroles = saml.get_saml_assertion(username, password, conf)
     except saml.SamlException as e:
+        print("SamlException:")
         print(e)
         sys.exit(12)
 
@@ -74,11 +76,14 @@ def adfs_aws_login():
             DurationSeconds=conf.DURATION,
         )
     except:
+        print("unable to assume role with saml")
         sys.exit(15)
     try:
         credentials.write(token, conf.PROFILE)
     except:
+        print("unable to write credentials")
         sys.exit(16)
+    print("script complete")
     sys.exit(0)
 
 def select_role(awsroles):
