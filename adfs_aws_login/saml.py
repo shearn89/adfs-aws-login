@@ -38,7 +38,13 @@ def get_saml_assertion(username, password, conf):
     # Opens the initial IdP url and follows all of the HTTP302 redirects, and
     # gets the resulting login page
     print(f"calling session get on {conf.ADFS_LOGIN_URL}, with SSL verify")
-    formresponse = session.get(conf.ADFS_LOGIN_URL, verify=True)
+    try:
+        formresponse = session.get(conf.ADFS_LOGIN_URL, verify=True)
+        print(f"session.get status: {formresponse.status_code}")
+    except Exception as e:
+        print("got exception calling session.get:")
+        print(str(e))
+        raise e
     print("got form response")
     # Capture the idpauthformsubmiturl, which is the final url after all the 302s
     idpauthformsubmiturl = formresponse.url

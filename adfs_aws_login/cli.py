@@ -47,8 +47,8 @@ def adfs_aws_login():
         print("attempting saml assertion")
         assertion, awsroles = saml.get_saml_assertion(username, password, conf)
         print("assertion complete")
-    except saml.SamlException as e:
-        print("SamlException:")
+    except Exception as e:
+        print("Exception calling get_saml_assertion:")
         print(e)
         sys.exit(12)
 
