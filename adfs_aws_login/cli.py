@@ -15,8 +15,9 @@ except NameError:
 def adfs_aws_login():
     try:
         conf = init()
-    except:
+    except Exception as e:
         print("failed to load config")
+        print(str(e))
         sys.exit(9)
     username = None
     # Get the federated credentials from the user
@@ -75,13 +76,15 @@ def adfs_aws_login():
             SAMLAssertion=assertion,
             DurationSeconds=conf.DURATION,
         )
-    except:
+    except Exception as e:
         print("unable to assume role with saml")
+        print(str(e))
         sys.exit(15)
     try:
         credentials.write(token, conf.PROFILE)
-    except:
+    except Exception as e:
         print("unable to write credentials")
+        print(str(e))
         sys.exit(16)
     print("script complete")
     sys.exit(0)
