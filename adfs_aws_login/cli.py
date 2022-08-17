@@ -13,6 +13,7 @@ except NameError:
 
 
 def adfs_aws_login():
+    print("starting login script")
     try:
         conf = init()
     except Exception as e:
@@ -21,11 +22,15 @@ def adfs_aws_login():
         sys.exit(9)
     username = None
     # Get the federated credentials from the user
+    print("getting credentials")
     if not conf.NO_PROMPT:
+        print("prompting for username")
         sys.stdout.write("Username [" + conf.DEFAULT_USERNAME + "]: ")
         username = input()
     if not username:
+        print("username not set, checking config")
         if conf.DEFAULT_USERNAME:
+            print("getting username from config")
             username = conf.DEFAULT_USERNAME
         else:
             print("Need to give username")
@@ -36,23 +41,31 @@ def adfs_aws_login():
     else:
         print("asking for password")
         password = getpass()
+    print("got username and password")
 
     try:
+        print("attempting saml assertion")
         assertion, awsroles = saml.get_saml_assertion(username, password, conf)
+        print("assertion complete")
     except saml.SamlException as e:
         print("SamlException:")
         print(e)
         sys.exit(12)
 
+    print("cleaning memory")
     # Overwrite and delete the credential variables, just for safety
     username = "##############################################"
     password = "##############################################"
     del username
     del password
+    print("requesting role arn")
     role_arn = None
     if conf.NO_PROMPT and conf.ROLE_ARN:
+        print("no_prompt and role_arn set in conf, checking list of roles")
         for awsrole in awsroles:
+            print(f"checking {awsrole}")
             if awsrole.startswith(conf.ROLE_ARN + ","):
+                print(f"role matches {conf.ROLE_ARN}")
                 role_arn = conf.ROLE_ARN
                 principal_arn = awsrole.split(",")[1]
         if not role_arn:
@@ -68,20 +81,25 @@ def adfs_aws_login():
         print("No valid role found in assertions")
         print(awsroles)
         sys.exit(13)
+    print("role set, continuing")
     # Use the assertion to get an AWS STS token using Assume Role with SAML
     try:
+        print("attempting STS assume")
         token = sts().assume_role_with_saml(
             RoleArn=role_arn,
             PrincipalArn=principal_arn,
             SAMLAssertion=assertion,
             DurationSeconds=conf.DURATION,
         )
+        print("assumption complete")
     except Exception as e:
         print("unable to assume role with saml")
         print(str(e))
         sys.exit(15)
     try:
+        print("writing credentials to file")
         credentials.write(token, conf.PROFILE)
+        print("writing credentials complete")
     except Exception as e:
         print("unable to write credentials")
         print(str(e))
